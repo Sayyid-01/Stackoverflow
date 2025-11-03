@@ -31,7 +31,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       <Navbar handleSlideIn={handleSlideIn} />
 
       <div className="flex flex-1 pt-14">
-        <Sidebar isOpen={sidebarOpen} onLinkClick={handleLinkClick} />
+        <Sidebar isOpen={sidebarOpen} closeSidebar={handleLinkClick} />
         <main className="flex-1 min-h-screen overflow-auto p-4 bg-gray-50">{children}</main>
         <div className="hidden md:block border-l border-gray-200">
           <RightSideBar />

@@ -1,7 +1,7 @@
 import user from "../models/auth.js";
 import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
-import jw t from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 
 export const Signup = async (req, res) => {
     const { name, email, password } = req.body;

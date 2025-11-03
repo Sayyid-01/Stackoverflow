@@ -4,7 +4,6 @@ import cors from "cors"
 import mongoose from "mongoose"
 
 
-
 import userroutes from "./routes/auth.js"
 import questionroute from "./routes/question.js"
 import answerroutes from "./routes/answer.js"

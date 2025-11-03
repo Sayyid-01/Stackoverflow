@@ -1,24 +1,26 @@
 import axios from "axios";
 
-export const axiosInstance = axios.create({
-    baseURL: process.env.BACKEND_URL,
-    headers: {
-      "Content-Type": "application/json",
-    },
+const axiosInstance = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_BACKEND_URL, // ✅ client-safe env
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
-axiosInstance.interceptors.request.use(() => {
-  if(typeof window !== "undefined"){
-    const user = localStorage.getItem("user");
-    if(user){
-      const token = JSON.parse(user).token;
-      if(token){
-        return {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+
+axiosInstance.interceptors.request.use(
+  (config) => {
+    if (typeof window !== "undefined") {
+      const user = localStorage.getItem("user");
+      if (user) {
+        const token = JSON.parse(user)?.token;
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
         }
       }
     }
-  }
-})
+    return config; // ✅ must return config
+  },
+  (error) => Promise.reject(error)
+);
+
 export default axiosInstance;

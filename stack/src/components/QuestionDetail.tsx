@@ -190,6 +190,7 @@ const QuestionDetail = ({questionId}: any) => {
   const { user } = useAuth();
 
  useEffect(() => {
+  if (!questionId) return; 
     const fetchuser = async () => {
       try {
         const res = await axiosInstance.get("/question/getallquestion");
