@@ -1,36 +1,45 @@
 import axiosInstance from "@/lib/axiosinstance";
-import React, { useState,useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Loader from "./Loader/Loader";
 
-
+/* ======================
+   Types (ONLY ADDITION)
+====================== */
+interface Tag {
+  name: string;
+  description: string;
+  questions: number;
+  askedToday: number;
+  askedWeek: number;
+}
 
 export default function TagsComponent() {
-  const [hovered, setHovered] = useState(null);
+  const [hovered, setHovered] = useState<string | null>(null);
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState("Popular");
+  const [filter, setFilter] = useState<"Popular" | "Name" | "New">("Popular");
   const [page, setPage] = useState(1);
-  const [TAGS, setTags] = useState<any>([]);
+  const [TAGS, setTags] = useState<Tag[]>([]);
   const perPage = 16;
   const [loading, setLoading] = useState(true);
 
-useEffect(() => {
-  const fetchTags = async () => {
-    try {
-      const res = await axiosInstance.get("/tags");
-      setTags(res.data); // Or res.data.data depending on backend
-    } catch (error) {
-      console.error(error);
-    }finally {
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const res = await axiosInstance.get<Tag[]>("/tags");
+        setTags(res.data);
+      } catch (error) {
+        console.error(error);
+      } finally {
         setLoading(false);
       }
-  };
+    };
 
-  fetchTags();
-}, []);
+    fetchTags();
+  }, []);
 
-  // Filters + Sorting
-  const filtered = useMemo(() => {
-    let result = TAGS.filter((tag: { name: string; }) =>
+  // Filters + Sorting (LOGIC UNCHANGED)
+  const filtered = useMemo<Tag[]>(() => {
+    let result = TAGS.filter((tag) =>
       tag.name.toLowerCase().includes(search.toLowerCase())
     );
 
@@ -39,7 +48,7 @@ useEffect(() => {
     } else if (filter === "New") {
       result = [...result].sort((a, b) => b.askedToday - a.askedToday);
     } else {
-      result = [...result].sort((a, b) => b.questions - a.questions); // Popular
+      result = [...result].sort((a, b) => b.questions - a.questions);
     }
 
     return result;
@@ -49,23 +58,22 @@ useEffect(() => {
   const paginated = filtered.slice((page - 1) * perPage, page * perPage);
 
   if (loading) {
-    return (
-      <Loader text="Tags" />
-      
-    );
+    return <Loader text="Tags" />;
   }
 
- return (
+  return (
     <div className="min-h-screen bg-white">
       {/* Header Section */}
       <div className="border-b border-gray-300 bg-white">
         <div className="max-w-7xl mx-auto px-6 py-6">
           <h1 className="text-3xl font-normal mb-3 text-gray-900">Tags</h1>
           <p className="text-gray-700 mb-1">
-            A tag is a keyword or label that categorizes your question with other, similar questions.
+            A tag is a keyword or label that categorizes your question with other,
+            similar questions.
           </p>
           <p className="text-gray-700 mb-3">
-            Using the right tags makes it easier for others to find and answer your question.
+            Using the right tags makes it easier for others to find and answer
+            your question.
           </p>
           <a href="#" className="text-blue-600 text-sm hover:text-blue-700">
             Show all tag synonyms
@@ -77,8 +85,18 @@ useEffect(() => {
       <div className="max-w-7xl mx-auto px-6 py-6">
         <div className="flex items-center justify-between gap-3 mb-6">
           <div className="relative flex-1 max-w-xs">
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            <svg
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
             </svg>
             <input
               type="text"
@@ -134,7 +152,7 @@ useEffect(() => {
               className="relative border border-gray-300 rounded p-4 hover:border-gray-400 transition-colors bg-white"
             >
               <div className="mb-3">
-                <span 
+                <span
                   className="inline-block bg-blue-50 text-blue-700 px-2 py-1 rounded text-sm cursor-pointer"
                   onMouseEnter={() => setHovered(tag.name)}
                   onMouseLeave={() => setHovered(null)}
@@ -155,8 +173,10 @@ useEffect(() => {
                   questions
                 </div>
                 <div>
-                  <span className="font-semibold">{tag.askedToday}</span> asked today,{" "}
-                  <span className="font-semibold">{tag.askedWeek}</span> this week
+                  <span className="font-semibold">{tag.askedToday}</span> asked
+                  today,{" "}
+                  <span className="font-semibold">{tag.askedWeek}</span> this
+                  week
                 </div>
               </div>
 
@@ -169,7 +189,9 @@ useEffect(() => {
                     </span>
                   </div>
 
-                  <p className="text-gray-700 text-sm mb-4">{tag.description}</p>
+                  <p className="text-gray-700 text-sm mb-4">
+                    {tag.description}
+                  </p>
 
                   <div className="text-sm text-gray-700 space-y-1 mb-4">
                     <div>
@@ -181,7 +203,9 @@ useEffect(() => {
                     <div className="text-gray-600">
                       {tag.askedToday} asked today
                     </div>
-                    <div className="text-gray-600">{tag.askedWeek} this week</div>
+                    <div className="text-gray-600">
+                      {tag.askedWeek} this week
+                    </div>
                   </div>
 
                   <button className="w-full bg-white border border-gray-400 text-gray-700 text-sm py-1.5 rounded hover:bg-gray-50 transition-colors">
