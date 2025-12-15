@@ -5,73 +5,20 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { use, useEffect, useState } from "react";
 import axiosInstance from "@/lib/axiosinstance";
+import Loader from "../components/Loader/Loader";
+import { useSearch } from "../context/SearchContext";
 
-const questions = [
-  {
-    id: 1,
-    votes: 0,
-    answers: 0,
-    views: 3,
-    title:
-      "Mouse Cursor in 16-bit Assembly (NASM) Overwrites Screen Content in VGA Mode 0x12",
-    content:
-      "I'm developing a PS/2 mouse driver in 16-bit assembly (NASM) for a custom operating system running in VGA mode 0x12 (640x480, 16 colors). The driver initializes the mouse, handles mouse events, and ...",
-    tags: ["assembly", "operating-system", "driver", "osdev"],
-    author: "PR0X",
-    authorId: 1,
-    authorRep: 3,
-    timeAgo: "2 mins ago",
-  },
-  {
-    id: 2,
-    votes: 0,
-    answers: 1,
-    views: 12,
-    title:
-      "Template specialization inside a template class using class template parameters",
-    content:
-      "template<typename TypA, typename TypX> struct MyClass { using TypAlias = TypA<TypX>; // error: 'TypA' is not a template [-Wtemplate-body] }; MyClass is very often specialized like ...",
-    tags: ["c++", "templates"],
-    author: "Felix.leg",
-    authorId: 2,
-    authorRep: 799,
-    timeAgo: "11 mins ago",
-  },
-  {
-    id: 3,
-    votes: -2,
-    answers: 0,
-    views: 13,
-    title: "How can i block user with middleware?",
-    content:
-      "The problem I am trying to create a complete user login form in NextJS and I want to block the user to go to other pages without a login process before. So online i found that one of the most complete ...",
-    tags: ["node.js", "forms", "authentication", "next.js", "middleware"],
-    author: "Aledi5",
-    authorId: 3,
-    authorRep: 31,
-    timeAgo: "20 mins ago",
-  },
-  {
-    id: 4,
-    votes: 0,
-    answers: 0,
-    views: 6,
-    title:
-      "call:fail action: private-web3-wallet-v2-open-wallet-connect, error: Pairing error: Subscribe error: Timed out waiting for 60000 ms /what it means",
-    content:
-      "Can't connect my web3 wallet with a dApp. A message pops: Accounts must be CAIP-10 compliant The error message reads: call:fail action: private-web3-wallet-v2-open-wallet-connect, error: Pairing ...",
-    tags: ["web3", "wallet", "blockchain"],
-    author: "CryptoUser",
-    authorId: 4,
-    authorRep: 1,
-    timeAgo: "25 mins ago",
-  },
-];
+
 
 export default function Home() {
   const router = useRouter(); // 
   const [questions, setquestions] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const perPage = 15;
+  const [page, setPage] = useState(1);
+  const { searchQuery } = useSearch();
+
+  const [debouncedSearch, setDebouncedSearch] = useState(searchQuery);
 
   useEffect(() => {
     const fetchquestion = async () => {
@@ -87,25 +34,35 @@ export default function Home() {
     fetchquestion();
   }, [])
 
+  
+useEffect(() => {
+  const handler = setTimeout(() => {
+    setDebouncedSearch(searchQuery);
+  }, 500); 
+
+  return () => clearTimeout(handler); 
+}, [searchQuery]);
+
+
+  const filteredQuestions = !loading
+  ? questions.filter((q: any) =>
+      !debouncedSearch || q.questiontitle?.toLowerCase().includes(debouncedSearch.toLowerCase())
+    )
+  : [];
+
+
+
   if (loading) {
     return (
-      <Mainlayout>
-        <div className="flex h-screen w-full justify-center align-center">  
-            <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
-        </div>
-      </Mainlayout>
+    
+        <Loader text="Questions"/>  
+      
     );
   }
 
-  if(!questions || questions.length === 0){
-    return (
-      <Mainlayout>
-        <div className="text-center text-gray-500 mt-4">No question found.</div>
-      </Mainlayout>
-    );
-  }
-
-
+  const totalPages = Math.ceil(filteredQuestions.length / perPage);
+  const paginated = filteredQuestions.slice((page - 1) * perPage, page * perPage);
+ 
   return (
     <Mainlayout>
       <main className="min-w-0 p-4 lg:p-6 ">
@@ -148,7 +105,7 @@ export default function Home() {
           </div>
 
           <div className="space-y-4">
-            {questions.map((question:any) => (
+            {paginated.map((question: any) => (
               <div key={question.id} className="border-b border-gray-200 pb-4">
                 <div className="flex flex-col sm:flex-row gap-4">
                   <div className="flex sm:flex-col items-center sm:items-center text-sm text-gray-600 sm:w-16 lg:w-20 gap-4 sm:gap-2">
@@ -159,8 +116,8 @@ export default function Home() {
                     <div className="text-center">
                       <div
                         className={`font-medium ${question.answers > 0
-                            ? "text-green-600 bg-green-100 px-2 py-1 rounded"
-                            : ""
+                          ? "text-green-600 bg-green-100 px-2 py-1 rounded"
+                          : ""
                           }`}
                       >
                         {question.noofanswer.length}
@@ -217,9 +174,57 @@ export default function Home() {
                 </div>
               </div>
             ))}
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex gap-1 mt-12 justify-end items-center">
+                <button
+                  onClick={() => setPage(Math.max(1, page - 1))}
+                  disabled={page === 1}
+                  className="px-2 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Prev
+                </button>
+
+                {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                  let pageNum;
+                  if (totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (page <= 3) {
+                    pageNum = i + 1;
+                  } else if (page >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i;
+                  } else {
+                    pageNum = page - 2 + i;
+                  }
+
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => setPage(pageNum)}
+                      className={`px-3 py-1 text-sm rounded ${page === pageNum
+                          ? "bg-orange-500 text-white font-medium"
+                          : "text-gray-700 hover:bg-gray-100"
+                        }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+
+                <button
+                  onClick={() => setPage(Math.min(totalPages, page + 1))}
+                  disabled={page === totalPages}
+                  className="px-2 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Next
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </main>
     </Mainlayout>
   );
 }
+

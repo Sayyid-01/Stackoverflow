@@ -2,6 +2,7 @@ import React from 'react'
 import MainLayout from '@/components/layout/MainLayout'
 import { useRouter } from 'next/router';
 import QuestionDetail from '@/components/QuestionDetail';
+import RightSideBar from '@/components/RightSideBar';
 
 const index = () => {
     const router = useRouter();
@@ -10,7 +11,9 @@ const index = () => {
     <MainLayout>
       <div className="min-h-screen overflow-auto">
         <QuestionDetail questionId={Array.isArray(id) ? id[0] : id} />
+        
       </div>
+      
     </MainLayout>
   )
 }

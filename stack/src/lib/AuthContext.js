@@ -25,8 +25,9 @@ export const AuthProvider = ({ children }) => {
                 password,
             });
             const { data, token } = res.data;
-            localStorage.setItem("user", JSON.stringify(...data, token));
-            setUser(data);
+            const userData = { ...data, token };
+            localStorage.setItem("user", JSON.stringify(userData));
+            setUser(userData);
             toast.success("Signup Successful");
         } catch (error) {
             const msg = error.response?.data.message || "Signup failed";
@@ -45,7 +46,7 @@ export const AuthProvider = ({ children }) => {
                 password,
             });
             const { data, token } = res.data;
-            localStorage.setItem("user", JSON.stringify({...data, token}));
+            localStorage.setItem("user", JSON.stringify({ ...data, token }));
             setUser(data);
             toast.success("Login Successful");
         } catch (error) {

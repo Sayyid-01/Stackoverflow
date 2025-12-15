@@ -19,6 +19,7 @@ import { Calendar, Edit, Plus, X } from "lucide-react";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import Loader from "../../../components/Loader/Loader";
 
 
 
@@ -53,9 +54,7 @@ const index = () => {
     if (loading) {
         return (
             <Mainlayout>
-                <div className="flex items-center justify-center h-[100vh] w-full">
-                    <div className="animate-spin rounded-full h-20 w-20 border-t-4 border-b-4 border-blue-500"></div>
-                </div>
+                <Loader text="Users Details" />
             </Mainlayout>
         );
     }
